@@ -111,8 +111,8 @@ def extrema(x, minmax=False, strict=False, with_end=False):
         return np.sort(np.hstack([np.array(ind_max), np.array(ind_min)]))
 
 
-def emd(data, quek=False, shiftfactor=None, splinemean=False, zerocross=False,
-        interp_kind='cubic'):
+def emd(data, quek=False, shiftfactor=0.3, splinemean=False, zerocross=False,
+        interp_kind='cubic', epsilon=0.0001, ncheckimf=3):
     """
     The function estimates the empirical mode decomposition of a given data
     vector.
@@ -126,7 +126,7 @@ def emd(data, quek=False, shiftfactor=None, splinemean=False, zerocross=False,
         difference between successive rounds but with a modified comparison
         as adopted by Quek et alii (2003). The default is without the
         modification.
-    shiftfactor : bool
+    shiftfactor : float
         A floating point factor to be used in comparing normalised
         squared differences between successive rounds when testing for IMFs.
         The default is 0.3.
@@ -138,6 +138,17 @@ def emd(data, quek=False, shiftfactor=None, splinemean=False, zerocross=False,
         If set, the procedure tests for IMFs by comparing the number of
         extrema and zero crossings.  The default is by checking the size of the
         difference between successive rounds.
+    interp_kind : str|int
+        Specifies the kind of interpolation as a string ('linear', 'nearest',
+        'zero', 'slinear', 'quadratic, 'cubic' where 'slinear', 'quadratic'
+        and 'cubic' refer to a spline interpolation of first, second or third
+        order) or as an integer specifying the order of the spline
+        interpolator to use.
+    epsilon : float
+        factor for dealing with numerical precision
+    ncheckimf : int
+        number of shifting iterations to ensure stable IMF upon IMF candidate
+        detection.
 
     Returns
     -------
@@ -158,17 +169,6 @@ def emd(data, quek=False, shiftfactor=None, splinemean=False, zerocross=False,
     if not isinstance(data, np.ndarray):
         data = np.array(data)
     imf = []
-    # Set factor for dealing with numerical precision
-    epsilon = 0.0001
-
-    # Set number of shifting iterations to ensure stable IMF upon IMF candidate
-    # detection.
-    ncheckimf = 3
-
-    # Set factor limiting the normalised standard deviation between consecutive
-    # shifts in the IMF calculation.  Used if ZEROCROSS is not set.
-    if shiftfactor == None:
-        shiftfactor = 0.3
 
     # Initialise check variable for determining loop exit.
     # Check = 0 means that we have nothing yet.
@@ -182,12 +182,11 @@ def emd(data, quek=False, shiftfactor=None, splinemean=False, zerocross=False,
     checkexitval = 3
     # Length of the time series
     ndata = len(data)
-
+    data_std = np.std(data)
     # Initialise the vector to be decomposed (it is altered with each step)
-    x = data[:]
+    x = data
 
     # Decompose the Input Vector into Its IMFs
-
     # Iterate until signal has been decomposed
     while check < checkexitval:
     # Check if we have extracted everything (ie if you have the residual).
@@ -197,7 +196,7 @@ def emd(data, quek=False, shiftfactor=None, splinemean=False, zerocross=False,
         if nextrema <= 2:
             check = checkresval
         # Check for very small residual.
-        if np.std(x) < epsilon * np.std(data):
+        if np.std(x) < epsilon * data_std:
             check = checkresval
         # Remember what x was
         x0 = x
@@ -253,10 +252,10 @@ def emd(data, quek=False, shiftfactor=None, splinemean=False, zerocross=False,
                     meanval = [0]
                     # If the first extremum is a minimum, do it first
                     if minpos[0] < maxpos[0]:
-                        # meanpos = [ meanpos, (minpos[0] + maxpos[0]) / 2 ]
-                        meanpos = np.hstack([0, [(minpos[0] + maxpos[0]) / 2]])
-                        # meanval = [ meanval, (minval[0] + maxval[0]) / 2. ]
-                        meanval = np.hstack([0, [(minval[0] + maxval[0]) / 2.]])
+                        meanpos = np.hstack([0,
+                                             [(minpos[0] + maxpos[0]) / 2]])
+                        meanval = np.hstack([0,
+                                             [(minval[0] + maxval[0]) / 2.]])
                     # Now iterate through all maxima, taking the average of
                     # this maximum and the following minimum, and the following
                     # minimum and following maximum.
@@ -343,7 +342,7 @@ def emd(data, quek=False, shiftfactor=None, splinemean=False, zerocross=False,
                     else:
                 # Do not count this as a candidate IMF
                         checkimf = 0
-                if np.std(x) < epsilon * np.std(data):
+                if np.std(x) < epsilon * data_std:
                     checkres = checkres + 1
 
                 # Check to see if we have a satisfied IMF
