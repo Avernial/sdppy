@@ -1,7 +1,7 @@
 .. _contents:
 
 Welcome to SDPpy's documentation!
-===============================
+=================================
 
 sdppy is an open-source Python library for spectral data analysis.
 
@@ -25,6 +25,8 @@ Installation
 * cd sdppy-master
 * python3 setup.py build
 * sudo python3 setup.py install
+
+
 
 Documentation
 -------------
