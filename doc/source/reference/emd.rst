@@ -1,10 +1,14 @@
 Module "emd"
 ============
 
-.. currentmodule:: sdppy.wavelet
+.. currentmodule:: sdppy.emd
 
 ..  autosummary::
 
    :toctree: generated/
 
 	emd
+	extrema
+	interp
+	zero_cross
+	

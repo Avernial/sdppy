@@ -1,4 +1,4 @@
-__all__ = ["emd"]
+__all__ = ["emd", "extrema", "interp", "zero_cross"]
 
 import numpy as np
 from scipy.interpolate import interp1d

@@ -1,4 +1,13 @@
 Module "specf"
 ==============
 
-Test
+.. currentmodule:: sdppy.specf
+
+..  autosummary::
+
+   :toctree: generated/
+
+	first_diff
+	hilbert
+	hilbert_spec
+	imfhspectrum

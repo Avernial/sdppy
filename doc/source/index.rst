@@ -40,6 +40,7 @@ Examples
 
 ..  toctree::
 
+
 	reference/usage_emd.rst
 	reference/usage_wavelet.rst
     
