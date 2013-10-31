@@ -32,6 +32,7 @@ Documentation
 -------------
 
 ..  toctree::
+    :maxdepth: 1
 
 	reference/emd.rst
 	reference/wavelet.rst
