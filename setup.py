@@ -6,5 +6,5 @@ setup(name='sdppy',
       author='Aleksandr Kiselev',
       author_email='avernial@gmail.com',
       packages=['sdppy', ],
-      long_description=open('README').read()
+      long_description=open('README.md').read()
      )

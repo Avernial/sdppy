@@ -30,12 +30,18 @@ Documentation
 -------------
 
 ..  toctree::
-    :maxdepth: 2
+
+	reference/emd.rst
+	reference/wavelet.rst
+	reference/specf.rst
 
 Examples
 --------
 
 ..  toctree::
+
+	reference/usage_emd.rst
+	reference/usage_wavelet.rst
     
 Indices and tables
 ------------------
