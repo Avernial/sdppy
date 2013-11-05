@@ -9,8 +9,6 @@ import pydoc
 from io import StringIO
 from warnings import warn
 
-print("asdasdadadasdasadasddddddddddddddddddddddddddddddddddd")
-
 
 class Reader(object):
     """A line-based string reader.
