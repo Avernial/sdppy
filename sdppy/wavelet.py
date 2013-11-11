@@ -2,7 +2,7 @@ __all__ = ["wavelet"]
 
 from scipy.stats import chisqprob
 from scipy.special import gamma
-from scipy.misc import factorial
+from math import factorial
 import numpy as np
 
 

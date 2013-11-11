@@ -2,6 +2,7 @@ __all__ = ["emd", "extrema", "interp", "zero_cross"]
 
 import numpy as np
 from scipy.interpolate import interp1d
+from sdppy.specf import hilbert_spec
 
 
 def zero_cross(data, position=False):
@@ -362,3 +363,66 @@ def emd(data, quek=False, shiftfactor=0.3, splinemean=False, zerocross=False,
         # Substract the extracted IMF type filter textfrom the signal
         x = np.array(x0) - np.array(x)
     return imf
+
+
+def join_imf(imf):
+    """
+    The function returns 1d array of imf.
+
+    Parameters
+    ----------
+    imf : list
+        The list of imfs.
+
+    Returns
+    -------
+    result : ndarray
+    """
+    result = []
+    for i in imf:
+        result.extend(i)
+    return result
+
+
+class EmdResult():
+    """
+    Class for wrapping emd result for easy access to the imf.
+    The class provides an iterator over intrinsinc mode functions.
+    """
+    # : The intrinsic mode functions.
+    imf = None
+    # : The number of intrinsic function.
+    size = None
+
+    def __init__(self, imf):
+        self.imf = imf
+        self.size = len(self.imf)
+
+    def get_imf(self):
+        """
+        Returns intrinsic mode functions.
+        """
+        return join_imf(self.imf)
+
+    def __getitem__(self, num):
+        return self.imf[num]
+
+    def __iter__(self):
+        for i in range(self.size):
+            yield(self[i])
+
+    def __len__(self):
+        return self.size
+
+    def get_hspectr(self):
+        """
+        Return Hilbert spectrum and frequency.
+        """
+        hh, freq = hilbert_spec(self[0])
+        for i in range(1, int(self.size)):
+            temp, freq = hilbert_spec(self[i])
+            hh = hh + temp.copy()
+        return np.log1p(hh), freq
+
+    def get_recon(self):
+        return np.sum(self.imf, 0)
