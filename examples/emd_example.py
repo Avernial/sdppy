@@ -6,15 +6,15 @@ import matplotlib.pyplot as plt
 t = np.array(range(0, 314, 1)) * 0.5
 x = np.sin(t) + np.sin(t / 8)
 
-imf = emd(x, shiftfactor=3, interp_kind='cubic')
+result = emd(x, shiftfactor=3, interp_kind='cubic')
 
-print("The number of modes", len(imf))
+print("The number of modes", len(result))
 # EMD
 plt.figure(1)
 plt.suptitle('EMD')
 plt.subplot(211)
-for i in range(len(imf)):
-    plt.plot(imf[i], label='{0} imf'.format(i))
+for num, imf in enumerate(result):
+    plt.plot(imf, label='{0} imf'.format(num))
 plt.axis('tight')
 plt.legend()
 
@@ -22,13 +22,13 @@ plt.subplot(212)
 plt.grid(True)
 plt.title('Summary')
 print("Summary")
-plt.plot(np.sum(imf, 0), label='Recon')
+plt.plot(result.get_recon(), label='Recon')
 plt.plot(x, label='Original')
 plt.legend(loc='best')
 
 plt.figure(2)
 plt.title('Hilbert spectrum')
-spec, freq = imfhspectrum(imf, len(x))
+spec, freq = result.get_hspectr()
 plt.imshow(spec)
 plt.axis('tight')
 plt.figure(3)

@@ -961,14 +961,22 @@ def wavelet(y1, dt=0.25, lag1=0.0, s0=None, dj=0.125, param=6,
             dottem = np.dot(1. / np.sqrt(scale), wave.real)
             y1 = dj * np.sqrt(dt) / (cdelta * psi0) * dottem
             y1 = y1[0:n1]
-    return {'wave': wave[:, :n1],
-            'ypad': ypad[:n1],
-            'dof': dof,
-            'period': period,
-            'signif': signif,
-            'scale': scale,
-            'coi': coi,
-            'y1': y1,
-            'psi0': psi0,
-            'cdelta': cdelta
-            }
+    return WaveletResult(**{'wave': wave[:, :n1],
+                          'ypad': ypad[:n1],
+                          'dof': dof,
+                          'period': period,
+                          'signif': signif,
+                          'scale': scale,
+                          'coi': coi,
+                          'y1': y1,
+                          'psi0': psi0,
+                          'cdelta': cdelta})
+
+
+class WaveletResult(object):
+
+    def __init__(self, **kwargs):
+        for key in kwargs:
+            setattr(self, key, kwargs[key])
+        self.lpwr = (np.abs(np.array(self.wave))) ** 2
+        self.gpwr = np.sum(self.lpwr, 1)

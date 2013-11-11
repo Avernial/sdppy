@@ -362,7 +362,7 @@ def emd(data, quek=False, shiftfactor=0.3, splinemean=False, zerocross=False,
             check = 0
         # Substract the extracted IMF type filter textfrom the signal
         x = np.array(x0) - np.array(x)
-    return imf
+    return EmdResult(imf)
 
 
 def join_imf(imf):

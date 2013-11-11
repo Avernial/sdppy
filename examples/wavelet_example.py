@@ -28,13 +28,13 @@ x3 = np.sin(t3) * amplitude
 x = x1 + x2 + x3
 
 w = wavelet(x, dt=dt, pad=False, core='morlet')
-recon = w['y1']
-dif = x - w['y1']
+recon = w.y1
+dif = x - w.y1
 print(np.max(dif))
 
 plt.figure(1)
 plt.plot(x, label='Original')
-plt.plot(w['y1'], label='Reconstruction')
+plt.plot(w.y1, label='Reconstruction')
 plt.legend()
 plt.figure(3)
 plt.plot(dif)
