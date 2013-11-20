@@ -1,29 +1,37 @@
 from sdppy.emd import emd
-from sdppy.specf import imfhspectrum
+from sdppy.specf import imfhspectrum, hilbert_spec
 import numpy as np
 import matplotlib.pyplot as plt
 
-t = np.array(range(0, 314, 1)) * 0.5
+t = np.array(range(0, 500, 1)) * 0.5
 x = np.sin(t) + np.sin(t / 8)
+x = np.arange(len(x)) / 100. + x
+result = emd(x, shiftfactor=3, interp_kind='cubic', zerocross=True)
 
-result = emd(x, shiftfactor=3, interp_kind='cubic')
+spec, freq = hilbert_spec(result[0], dt=0.0001)
+print(freq)
 
 print("The number of modes", len(result))
 # EMD
 plt.figure(1)
 plt.suptitle('EMD')
-plt.subplot(211)
+plt.subplot(311)
 for num, imf in enumerate(result):
     plt.plot(imf, label='{0} imf'.format(num))
 plt.axis('tight')
 plt.legend()
 
-plt.subplot(212)
+plt.subplot(312)
 plt.grid(True)
 plt.title('Summary')
-print("Summary")
 plt.plot(result.get_recon(), label='Recon')
 plt.plot(x, label='Original')
+plt.legend(loc='best')
+
+plt.subplot(313)
+plt.grid(True)
+plt.title("diff")
+plt.plot(x - result.get_recon(), label='diff')
 plt.legend(loc='best')
 
 plt.figure(2)

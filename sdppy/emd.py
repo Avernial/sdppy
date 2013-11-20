@@ -1,4 +1,4 @@
-__all__ = ["emd", "extrema", "interp", "zero_cross"]
+__all__ = ["emd", "extrema", "interp", "zero_cross", "EmdResult"]
 
 import numpy as np
 from scipy.interpolate import interp1d
@@ -63,7 +63,8 @@ def interp(pos, val, new_pos, kind='cubic'):
     return_value : ndarray
         The interpolated data.
     """
-    f = interp1d(pos, val, kind=kind)
+    f = interp1d(pos, val, kind=kind, bounds_error=False,
+                 fill_value=np.average(val))
     return f(new_pos)
 
 
