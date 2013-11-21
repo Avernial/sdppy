@@ -1,4 +1,4 @@
-__all__ = ["emd", "extrema", "interp", "zero_cross", "EmdResult"]
+__all__ = ["emd", "extrema", "interp", "zero_cross", "EmdResult", "splinterp"]
 
 import numpy as np
 from scipy.interpolate import interp1d
@@ -37,7 +37,119 @@ def zero_cross(data, position=False):
         return len(np.where(np.sign(data[1:]) != np.sign(data[:-1]))[0])
 
 
-def interp(pos, val, new_pos, kind='cubic'):
+def splinterp(x, y, t, sigma=None):
+    """
+    The function 'splinterp' interpolates the data using cubic spline
+    interpolation.
+
+    Parameters
+    ----------
+    x : list|ndarray
+        The input array. Values MUST be monotonically increasing.
+
+    y : list|ndarray
+        The vector of ordinate values corresponding to X.
+
+    t : list|ndarray
+        The vector of abcissae values for which the ordinate is
+        desired. The values of T MUST be monotonically increasing.
+    sigma : The amount of "tension" that is applied to the curve. The
+        default value is 1.0. If sigma is close to 0, (e.g., .01),
+        then effectively there is a cubic spline fit. If sigma
+        is large, (e.g., greater than 10), then the fit will be like
+        a polynomial interpolation.
+
+    Returns
+    -------
+    return_value : ndarray
+        The interpolated data.
+    """
+    if len(x) < len(y):
+        n = len(x)
+    else:
+        n = len(y)
+    if (n <= 2):
+        print('x and y must be arrays of 3 or more elements.')
+    if sigma == None:
+        sigma = 1.0
+    yp = np.arange(2 * n, dtype='f4')
+    nm1 = n - 1
+    xx = np.array(x, dtype='f8')
+    yy = np.array(y, dtype='f8')
+    tt = np.array(t, dtype='f8')
+    delx1 = xx[1] - xx[0]
+    dx1 = (yy[1] - yy[0]) / delx1
+    delx2 = xx[2] - xx[1]
+    delx12 = xx[2] - xx[0]
+    c1 = -(delx12 + delx1) / delx12 / delx1
+    c2 = delx12 / delx1 / delx2
+    c3 = -delx1 / delx12 / delx2
+    slpp1 = c1 * yy[0] + c2 * yy[1] + c3 * yy[2]
+    deln = xx[nm1] - xx[nm1 - 1]
+    delnm1 = xx[nm1 - 1] - xx[nm1 - 2]
+    delnn = xx[nm1] - xx[nm1 - 2]
+    c1 = (delnn + deln) / delnn / deln
+    c2 = -delnn / deln / delnm1
+    c3 = deln / delnn / delnm1
+    slppn = c3 * yy[nm1 - 2] + c2 * yy[nm1 - 1] + c1 * yy[nm1]
+    sigmap = sigma * nm1 / (xx[nm1] - xx[0])
+    dels = sigmap * delx1
+    exps = np.exp(dels)
+    sinhs = 0.5 * (exps - 1. / exps)
+    sinhin = 1. / (delx1 * sinhs)
+    diag1 = sinhin * (dels * np.double(0.5) * (exps + 1. / exps) - sinhs)
+    diagin = 1. / diag1
+    yp[0] = diagin * (dx1 - slpp1)
+    spdiag = sinhin * (sinhs - dels)
+    yp[n] = diagin * spdiag
+    # Do as much work using vectors as possible.
+    delx2 = xx[1:] - xx[:len(xx) - 1]
+    dx2 = (yy[1:] - yy[:len(yy) - 1]) / delx2
+    dels = sigmap * delx2
+    exps = np.exp(dels)
+    sinhs = 0.5 * (exps - 1. / exps)
+    sinhin = 1. / (delx2 * sinhs)
+    diag2 = sinhin * (dels * (0.5 * (exps + 1. / exps)) - sinhs)
+    diag2 = np.hstack([[0], diag2[:len(diag2) - 1] + diag2[1:]])
+    dx2nm1 = dx2[nm1 - 1]
+    dx2 = np.hstack([[0], dx2[1:] - dx2[:len(dx2) - 1]])
+    spdiag = sinhin * (sinhs - dels)
+    for i in range(1, nm1, 1):
+        diagin = 1. / (diag2[i] - spdiag[i - 1] * yp[i + n - 1])
+        yp[i] = diagin * (dx2[i] - spdiag[i - 1] * yp[i - 1])
+        yp[i + n] = diagin * spdiag[i]
+    diagin = 1. / (diag1 - spdiag[nm1 - 1] * yp[n + nm1 - 1])
+    yp[nm1] = diagin * (slppn - dx2nm1 - spdiag[nm1 - 1] * yp[nm1 - 1])
+    for i in range(n - 2, -1, -1):
+        yp[i] = yp[i] - yp[i + n] * yp[i + 1]
+    m = len(t)
+    subs = np.tile(nm1, (m,))
+    s = xx[nm1] - xx[0]
+    sigmap = sigma * nm1 / s
+    j = 0
+    # find subscript where xx[subs] > t(j) > xx[subs-1]
+    for i in range(1, nm1, 1):
+        while tt[j] < xx[i]:
+            subs[j] = i
+            j += 1
+            if j == m:
+                break
+    subs1 = subs - 1
+    del1 = tt - xx[subs1]
+    del2 = xx[subs] - tt
+    dels = xx[subs] - xx[subs1]
+    exps1 = np.exp(sigmap * del1)
+    sinhd1 = 0.5 * (exps1 - 1. / exps1)
+    exps = np.exp(sigmap * del2)
+    sinhd2 = 0.5 * (exps - 1. / exps)
+    exps = exps1 * exps
+    sinhs = 0.5 * (exps - 1. / exps)
+    spl = (yp[subs] * sinhd1 + yp[subs1] * sinhd2) / sinhs + \
+    ((yy[subs] - yp[subs]) * del1 + (yy[subs1] - yp[subs1]) * del2) / dels
+    return spl
+
+
+def interp(pos, val, new_pos, kind='cubic', sigma=None):
     """
     The function 'interp' interpolates the data.
 
@@ -63,9 +175,12 @@ def interp(pos, val, new_pos, kind='cubic'):
     return_value : ndarray
         The interpolated data.
     """
-    f = interp1d(pos, val, kind=kind, bounds_error=False,
-                 fill_value=np.average(val))
-    return f(new_pos)
+    if kind == 'default':
+        return splinterp(pos, val, new_pos, sigma)
+    else:
+        f = interp1d(pos, val, kind=kind, bounds_error=False,
+                     fill_value=np.average(val))
+        return f(new_pos)
 
 
 def extrema(x, minmax=False, strict=False, with_end=False):
@@ -114,7 +229,7 @@ def extrema(x, minmax=False, strict=False, with_end=False):
 
 
 def emd(data, quek=False, shiftfactor=0.3, splinemean=False, zerocross=False,
-        interp_kind='cubic', epsilon=0.0001, ncheckimf=3):
+        interp_kind='default', epsilon=0.0001, ncheckimf=3):
     """
     The function estimates the empirical mode decomposition of a given data
     vector.
@@ -151,6 +266,10 @@ def emd(data, quek=False, shiftfactor=0.3, splinemean=False, zerocross=False,
     ncheckimf : int
         number of shifting iterations to ensure stable IMF upon IMF candidate
         detection.
+    interp_kind : str
+        Specifies the kind of interpolation as a string, default 'default'
+        ('linear', 'nearest', 'zero', 'slinear', 'quadratic, 'cubic',
+        'default')
 
     Returns
     -------
@@ -190,6 +309,7 @@ def emd(data, quek=False, shiftfactor=0.3, splinemean=False, zerocross=False,
 
     # Decompose the Input Vector into Its IMFs
     # Iterate until signal has been decomposed
+    c = 0
     while check < checkexitval:
     # Check if we have extracted everything (ie if you have the residual).
     # Find local extrema for minimum and maximum envelopes.
@@ -210,6 +330,7 @@ def emd(data, quek=False, shiftfactor=0.3, splinemean=False, zerocross=False,
         # Iterate while the IMF criterion is not yet reached.
         # These criteria are incorporated into the Check variable.
         while check == 0:
+            c = c + 1
             # Find local extrema s1for minimum and maximum envelopes
             # temp = extrema( x, minima=minima, maxima=maxima, /flat )
             minima, maxima = extrema(x, minmax=True)
@@ -363,6 +484,7 @@ def emd(data, quek=False, shiftfactor=0.3, splinemean=False, zerocross=False,
             check = 0
         # Substract the extracted IMF type filter textfrom the signal
         x = np.array(x0) - np.array(x)
+    print("iteration = ", c)
     return EmdResult(imf)
 
 
