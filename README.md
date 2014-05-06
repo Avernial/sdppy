@@ -1,7 +1,7 @@
 sdppy
 =====
 
-sdppy is an open-source Python library for spectral data analysis.
+*sdppy* is an open-source Python library for spectral data analysis.
 
 The package contains ported EMD (Empirical Mode Decomposition) and wavelet with language IDL.
 
@@ -12,9 +12,9 @@ EMD algorithm was provided by Daithi A. Stone (stoned@atm.ox.ac.uk)
 Requirements
 ------------
 
- * Python (2.7+)
- * NumPy
- * SciPy
+ * [Python (2.7+)](http://python.org/ "Python.org")
+ * [Numpy](http://www.scipy.org/scipylib/download.html "Numpy")
+ * [SciPy](http://www.scipy.org/install.html "Scipy")
 
 Installation
 ------------
