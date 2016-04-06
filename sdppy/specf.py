@@ -1,5 +1,3 @@
-__all__ = ["hilbert_spec", "imfhspectrum", "hilbert", "first_diff"]
-
 import numpy as np
 
 
@@ -39,11 +37,11 @@ def hilbert_spec(data, time=None, dt=None):
     # A numerical fix term
     # epsilon = 0.00001
     # Determine time coordinates of spectral output
-    if time != None:
+    if time is not None:
         t = time
         dt = t[1] - t[0]
     else:
-        if dt == None:
+        if dt is None:
             dt = 1.
         else:
             t = dt * np.arange(nt, dtype='f4') + dt / 2.
@@ -199,7 +197,7 @@ def first_diff(data, direct='backward'):
     n = len(data)
     # Output
     fdif = np.zeros(n, dtype='f4')
-    if not direct in ('backward', 'forward', 'centered'):
+    if direct not in ('backward', 'forward', 'centered'):
         print('Options must be backward, forward or centered')
         return -1
     # Calculate First Difference
@@ -225,3 +223,5 @@ def first_diff(data, direct='backward'):
         id2 = np.hstack([n - 1, np.arange(n - 1, dtype='i')])
         fdif = (data[id1] - data[id2]) / 2.
     return fdif
+
+__all__ = ["hilbert_spec", "imfhspectrum", "hilbert", "first_diff"]

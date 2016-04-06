@@ -1,8 +1,6 @@
 from sdppy.emd import emd
 import numpy as np
 import matplotlib.pyplot as plt
-from sdp.decorators import timeit
-emd = timeit(emd)
 
 t = np.array(range(0, 628, 1)) * 0.5
 x = np.sin(t) + np.sin(t / 8)

@@ -1,5 +1,3 @@
-__all__ = ["wavelet"]
-
 from scipy.stats import chisqprob
 from scipy.special import gamma
 from math import factorial
@@ -101,7 +99,7 @@ def bisectpdf(a, up, below):
     mid = below + (up - below) * p
     count = 1
     while (abs(up - low) > dl * mid) and (count < 100):
-        if z != None:
+        if z is not None:
             if z > p:
                 up = mid
             else:
@@ -393,8 +391,8 @@ def Paul(k, scale, k0=-1):
     expnt = -(scale * k) * (k > 0)
     dt = 2 * np.pi / (n * k[1])
     norm = np.sqrt(2 * np.pi * (scale / dt) * ((2 ** k0) /
-                                         np.sqrt(k0 *
-                                                 factorial(2 * k0 - 1))))
+                                               np.sqrt(k0 *
+                                                       factorial(2 * k0 - 1))))
     expnt[np.where(expnt < -100)] = -100
     paul = norm * ((scale * k) ** k0) * np.exp(expnt)
     paul = paul * (k > 0.)
@@ -406,13 +404,14 @@ def Paul(k, scale, k0=-1):
     if (k0 == 4):
         # reconstruction factor
         Cdelta = 1.132
-    psi0 = 2. ** k0 * factorial(k0) / np.sqrt(np.pi * factorial(2 * k0))
+    psi0 = 2. ** k0 * factorial(k0) / np.sqrt(np.pi *
+                                              factorial(2 * k0))
     return paul, coi, dofmin, Cdelta, period, psi0
 
 
 def wave_coherency(time1, time2, scale1, scale2, wave1, wave2,
-                       coi1, coi2, dt, dj=0.125, nosmooth=False,
-                       verbose=False):
+                   coi1, coi2, dt, dj=0.125, nosmooth=False,
+                   verbose=False):
     """
     The function compute the wavelet coherency between two time series.
 
@@ -483,7 +482,7 @@ def wave_coherency(time1, time2, scale1, scale2, wave1, wave2,
     # cross wavelet & individual wavelet power
     cross_wavelet = (wave1[time1_start:time1_end, scale1_start:scale1_end] *
                      np.conj(wave2[time2_start:time2_end,
-                                scale2_start:scale2_end]))
+                                   scale2_start:scale2_end]))
     power1 = np.abs(wave1[time1_start:time1_end, scale1_start:scale1_end]) ** 2
     power2 = np.abs(wave2[time2_start:time2_end, scale2_start:scale2_end]) ** 2
 
@@ -569,8 +568,8 @@ def wave_coherency(time1, time2, scale1, scale2, wave1, wave2,
 
 
 def wave_signif(y, dt, scale, dof=2, sigtest=1, core='morlet',
-                    param=-1, lag1=[0.0], siglvl=0.95, gws=None,
-                    confidence=False, psi0=None, cdelta=None):
+                param=-1, lag1=[0.0], siglvl=0.95, gws=None,
+                confidence=False, psi0=None, cdelta=None):
     """
     The function compute the significance levels for a wavelet transform.
 
@@ -773,9 +772,9 @@ def wave_signif(y, dt, scale, dof=2, sigtest=1, core='morlet',
 
 
 def wavelet(y1, dt=0.25, lag1=0.0, s0=None, dj=0.125, param=6,
-                    siglvl=0.95, j=None, fft_theor=None, voice=None,
-                    verbose=False, dodaughter=False, nowave=False, recon=True,
-                    pad=True, _oct=None, core="morlet"):
+            siglvl=0.95, j=None, fft_theor=None, voice=None,
+            verbose=False, dodaughter=False, nowave=False, recon=True,
+            pad=True, _oct=None, core="morlet"):
     """
     Compute the wavelet transform of a 1D time series.
 
@@ -853,17 +852,17 @@ def wavelet(y1, dt=0.25, lag1=0.0, s0=None, dj=0.125, param=6,
 
     Examples
     --------
-    >>> t = array(range(0, 314 * 100, 1)) * 0.005
-    >>> x1 = sin(t) + sin(t / 8) + sin(t / 16)
+    >>> import numpy as np
+    >>> t = np.array(range(0, 314 * 100, 1)) * 0.005
+    >>> x1 = np.sin(t) + np.sin(t / 8) + np.sin(t / 16)
     >>> wv = wavelet(x1, dt=0.25, core='morlet')
-    >>> lpwr = (abs(array(wv[0]))) ** 2
     >>> import matplotlib.pyplot as plt
     >>> plt.figure(1)
-    >>> plt.imshow(lpwr)
+    >>> plt.imshow(wv.lpwr)
     >>> plt.axis('tight')
     >>> plt.show()
     """
-        # Initial core of wavelet
+    # Initial core of wavelet
     if core.lower() == "morlet":
         cwave = Morlet
     else:
@@ -942,7 +941,7 @@ def wavelet(y1, dt=0.25, lag1=0.0, s0=None, dj=0.125, param=6,
             s = s + "\n period({0}) = {2}"
             print(s.format(i, scale[i], period[i]))
     coi = coi * np.append(np.arange(n1 / 2, dtype='f4'),
-                       np.arange(n1 / 2, dtype='f4')[::-1]) * dt
+                          np.arange(n1 / 2, dtype='f4')[::-1]) * dt
     # shift so DAUGHTERs are in middle of array
     if dodaughter:
         daughter = [daughter[n - n1 / 2:, :], daughter[0:n1 / 2 - 1, :]]
@@ -962,15 +961,15 @@ def wavelet(y1, dt=0.25, lag1=0.0, s0=None, dj=0.125, param=6,
             y1 = dj * np.sqrt(dt) / (cdelta * psi0) * dottem
             y1 = y1[0:n1]
     return WaveletResult(**{'wave': wave[:, :n1],
-                          'ypad': ypad[:n1],
-                          'dof': dof,
-                          'period': period,
-                          'signif': signif,
-                          'scale': scale,
-                          'coi': coi,
-                          'y1': y1,
-                          'psi0': psi0,
-                          'cdelta': cdelta})
+                            'ypad': ypad[:n1],
+                            'dof': dof,
+                            'period': period,
+                            'signif': signif,
+                            'scale': scale,
+                            'coi': coi,
+                            'y1': y1,
+                            'psi0': psi0,
+                            'cdelta': cdelta})
 
 
 class WaveletResult(object):
@@ -980,3 +979,5 @@ class WaveletResult(object):
             setattr(self, key, kwargs[key])
         self.lpwr = (np.abs(np.array(self.wave))) ** 2
         self.gpwr = np.sum(self.lpwr, 1)
+
+__all__ = ["wavelet"]

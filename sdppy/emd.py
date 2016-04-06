@@ -1,5 +1,3 @@
-__all__ = ["emd", "extrema", "interp", "zero_cross", "EmdResult", "splinterp"]
-
 import numpy as np
 from scipy.interpolate import interp1d
 from sdppy.specf import hilbert_spec
@@ -70,7 +68,7 @@ def splinterp(x, y, t, sigma=None):
         n = len(y)
     if (n <= 2):
         print('x and y must be arrays of 3 or more elements.')
-    if sigma == None:
+    if sigma is None:
         sigma = 1.0
     yp = np.arange(2 * n, dtype='f4')
     nm1 = n - 1
@@ -144,8 +142,9 @@ def splinterp(x, y, t, sigma=None):
     sinhd2 = 0.5 * (exps - 1. / exps)
     exps = exps1 * exps
     sinhs = 0.5 * (exps - 1. / exps)
-    spl = (yp[subs] * sinhd1 + yp[subs1] * sinhd2) / sinhs + \
-    ((yy[subs] - yp[subs]) * del1 + (yy[subs1] - yp[subs1]) * del2) / dels
+    spl = ((yp[subs] * sinhd1 + yp[subs1] * sinhd2) / sinhs +
+           ((yy[subs] - yp[subs]) * del1 +
+            (yy[subs1] - yp[subs1]) * del2) / dels)
     return spl
 
 
@@ -311,8 +310,8 @@ def emd(data, quek=False, shiftfactor=0.3, splinemean=False, zerocross=False,
     # Iterate until signal has been decomposed
     c = 0
     while check < checkexitval:
-    # Check if we have extracted everything (ie if you have the residual).
-    # Find local extrema for minimum and maximum envelopes.
+        # Check if we have extracted everything (ie if you have the residual).
+        # Find local extrema for minimum and maximum envelopes.
         nextrema = len(extrema(x))
         # Check for at least 1 extremum.
         if nextrema <= 2:
@@ -390,7 +389,8 @@ def emd(data, quek=False, shiftfactor=0.3, splinemean=False, zerocross=False,
                         nid = np.where(tmp == id1)[0]
                         # If such a minimum exists
                         if nid != 0:
-                        # Add the average position and value to our collection
+                            # Add the average position and value to
+                            # our collection
                             meanpos.extend([(maxpos[i] + minpos[id1]) / 2])
                             meanval.extend([(maxval[i] + minval[id1]) / 2.])
                             # Determine the position of the next maxmum after
@@ -401,8 +401,8 @@ def emd(data, quek=False, shiftfactor=0.3, splinemean=False, zerocross=False,
                             nid = np.where(tmp == id2)[0]
                             # If such a maximum exists
                             if nid != 0:
-                            # Add the average position and value to our
-                            # collection
+                                # Add the average position and value to our
+                                # collection
                                 meanpos.extend([(maxpos[id2] +
                                                  minpos[id1]) / 2])
                                 meanval.extend([(maxval[id2] +
@@ -416,7 +416,7 @@ def emd(data, quek=False, shiftfactor=0.3, splinemean=False, zerocross=False,
                     meanval = np.array(meanval)[1 + np.array(idf, dtype='int')]
                     # Estimate the local mean through a spline interpolation
                     localmean = interp(meanpos, meanval, np.arange(ndata),
-                                    kind=interp_kind)
+                                       kind=interp_kind)
                     # If we want to take the mean of the splines of the extrema
                 else:
                     # Spline interpolate to get maximum and minimum envelopes
@@ -447,23 +447,22 @@ def emd(data, quek=False, shiftfactor=0.3, splinemean=False, zerocross=False,
                 # If the IMF criterion is checking the size of the difference
                 # between successive rounds.
                 if not(zerocross):
-                # Measure which will be used to stop the sifting process.
-                # Huang refers to this as the standard deviation (SD) even
-                # though it is not.
-
-                # Calculate SD the traditional way
+                    # Measure which will be used to stop the sifting process.
+                    # Huang refers to this as the standard deviation (SD) even
+                    # though it is not.
+                    # Calculate SD the traditional way
                     if not(quek):
                         sd = np.sum(((xold - x) ** 2) / (xold ** 2 + epsilon))
-                # Or Quek et alii's modified way
+                        # Or Quek et alii's modified way
                     else:
                         sd = np.sum((xold - x) ** 2) / np.sum(xold ** 2)
 
-                # Compare sd value against threshold
+                    # Compare sd value against threshold
                     if sd < shiftfactor:
-                # Count this as a candidate IMF
+                        # Count this as a candidate IMF
                         checkimf = checkimf + 1
                     else:
-                # Do not count this as a candidate IMF
+                        # Do not count this as a candidate IMF
                         checkimf = 0
                 if np.std(x) < epsilon * data_std:
                     checkres = checkres + 1
@@ -549,3 +548,5 @@ class EmdResult():
 
     def get_recon(self):
         return np.sum(self.imf, 0)
+
+__all__ = ["emd", "extrema", "interp", "zero_cross", "EmdResult", "splinterp"]
