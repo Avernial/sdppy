@@ -190,7 +190,7 @@ def complexv(x, y):
         print("Dimension of first and second array not equals.")
     else:
         if np.size(x) == 1:
-                return np.complex(x, y)
+            return np.complex(x, y)
         else:
             return np.vectorize(np.complex)(x[:], y[:])
 
@@ -875,7 +875,7 @@ def wavelet(y1, dt=0.25, lag1=0.0, s0=None, dj=0.125, param=6,
     n = len(y1)
     n1 = n
     # power of 2 nearest to N
-    base2 = np.fix(np.log(n) / np.log(2) + 0.4999)
+    base2 = np.fix(np.log(n) / np.log(2) + 0.4999).astype(int)
     # ....check keywords & optional inputs
     if s0 is None:
         s0 = 2.0 * dt
@@ -900,14 +900,14 @@ def wavelet(y1, dt=0.25, lag1=0.0, s0=None, dj=0.125, param=6,
     scale = 2. ** (np.arange(na) * dj) * s0
     # empty period array (filled in below)
     period = np.arange(na, dtype='f8')
-    wave = np.arange(n * round(na), dtype='complex').reshape(round(na), n)
+    wave = np.arange(n * int(round(na)), dtype='complex').reshape(int(round(na)), n)
     # wavelet array
     if dodaughter:
         # empty daughter array
         daughter = wave
     # construct wavenumber array used in transform [Eqn(5)]
     k = (np.arange(n / 2.) + 1) * (2 * np.pi) / (n * dt)
-    k = np.append(k, -k[0:n / 2 - 1][::-1])
+    k = np.append(k, -k[0:n // 2 - 1][::-1])
     k = np.append(0, k)
     # compute FFT of the (padded) time series
     yfft = np.fft.ifft(ypad)
@@ -922,7 +922,7 @@ def wavelet(y1, dt=0.25, lag1=0.0, s0=None, dj=0.125, param=6,
     else:
         fft_theor_k = (1 - lag1 ** 2) / (1 - 2 * lag1 * np.cos(k * dt) +
                                          lag1 ** 2)
-    fft_theor = np.zeros(na, dtype='f4')
+    fft_theor = np.zeros(int(na), dtype='f4')
     # loop thru each SCALE
     # scale
     for i in range(0, int(na), 1):
