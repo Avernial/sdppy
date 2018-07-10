@@ -1,8 +1,9 @@
-from scipy.stats import chisqprob
+from scipy import stats
 from scipy.special import gamma
 from math import factorial
 import numpy as np
 
+chisqprob = lambda chisq, df: stats.chi2.sf(chisq, df)
 
 def chisqrpdf(v, df):
     """

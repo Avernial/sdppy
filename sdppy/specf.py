@@ -154,7 +154,7 @@ def hilbert(data, direction=1):
     i = np.complex(0.0, 1.0)
     if direction == -1:
         i = i * direction
-    n2 = n / 2 - 1
+    n2 = n // 2 - 1
     tmp = y[1:n2 + 1] * i
     y[1:n2 + 1] = tmp
     n2 = n - n2
